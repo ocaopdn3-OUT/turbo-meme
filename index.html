@@ -3829,7 +3829,7 @@ function buildFormView(){
   ${f.eventType==="minor"?buildMinorFields(f,subCode):buildMajorZone(f)}
 
   ${f.eventType==='major'?`
-  <div style="margin-top:13px"><div class="lbl" style="color:#40e080">สายที่ป้องกัน ${bdData?'<span class="badge" style="background:#08200e;color:#40e080;border:1px solid #1a6030">อัตโนมัติ</span>':''}</div>
+  <div style="margin-top:13px"><div class="lbl" style="color:#40e080">คำอธิบายอุปกรณ์ป้องกัน ${bdData?'<span class="badge" style="background:#08200e;color:#40e080;border:1px solid #1a6030">อัตโนมัติ</span>':''}</div>
     <textarea rows="3" ${bdData?"class='readonly-field' readonly":""} oninput="${bdData?"":"setForm({line:this.value})"}" placeholder="เลือกสถานีและเบรกเกอร์เพื่อแสดงอัตโนมัติ">${(bdData?bdData.line:f.line)||""}</textarea>
   </div>`:''}
   <div style="margin-top:13px"><div class="lbl" style="color:#40e080">พื้นที่ได้รับผลกระทบ ${bdData?'<span class="badge" style="background:#08200e;color:#40e080;border:1px solid #1a6030">อัตโนมัติ</span>':''}</div>
@@ -4437,7 +4437,7 @@ window.exportReport=function(id){
     '<td class="val"><span class="'+((r.tripType||'').includes('Lockout')?'bl':'br')+'">'+((r.tripType||'–'))+'</span></td>',
     '<td class="lbl" style="border-left:1.5px solid #c0d4f0">RELAY ที่ทำงาน</td>',
     '<td class="val" style="font-weight:600;color:#1a3a6a">'+relayStr+'</td></tr>',
-    '<tr><td class="lbl">สายที่ป้องกัน</td><td class="val vg" colspan="3" style="white-space:normal;word-break:break-word">'+(r.line||'–')+'</td></tr>',
+    '<tr><td class="lbl">คำอธิบายอุปกรณ์ป้องกัน</td><td class="val vg" colspan="3" style="white-space:normal;word-break:break-word">'+(r.line||'–')+'</td></tr>',
     '<tr><td class="lbl">PHASE</td><td class="val">'+(r.phase||'–')+'</td>',
     '<td class="lbl" style="border-left:1.5px solid #c0d4f0">ระยะทาง (กม.)</td>',
     '<td class="val">'+(r.zone||'–')+'</td></tr>',
