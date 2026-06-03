@@ -65,7 +65,7 @@ textarea{resize:vertical}
 // ══════════════════════════════════════════
 // SCRIPT_URL — Google Apps Script
 // ══════════════════════════════════════════
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3JmHCQaOUd7mqSmehyRdo5y-IeCpCQfIuNQA-Mi4HWRIJZR6s0qe5c-42OpsAw_on/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyUbi7ViMYUfr8PKnJ7NMNO-kjb8B9yvoQ0T3PkNKV8oddffbp-Rpdq6Iqg7OH3TBj4/exec";
 const SHEET_ID   = "1LSqtQ5aOx7qlJP7gyivMTDi0l2zGnFgPD7V--pZlYfk";
 
 // ══════════════════════════════════════════
@@ -3187,6 +3187,14 @@ const DIST_TABLE = [
   {bus:"BUS1",sub:"QIU",dist:"> 40",v3ph:684.0,v2ph:592.0,v2phg:584.0,v1phg:378.0},
 ];
 
+// helper: ดึงชื่อสถานีจาก live cache หรือ hardcode
+function getSubName(code){
+  if(!code) return '';
+  const c = code.split(' — ')[0].trim();
+  if(subNamesCache && subNamesCache[c]) return subNamesCache[c];
+  return SUB_NAMES[c] || c;
+}
+
 const SUB_NAMES = {
   "1EFG01":"\u0e40\u0e2d\u0e47\u0e19\u0e40\u0e19\u0e2d\u0e23\u0e4c\u0e22\u0e35\u0e48 \u0e40\u0e1f\u0e34\u0e23\u0e4c\u0e2a",
   "1EFG02":"\u0e40\u0e2d\u0e47\u0e19\u0e40\u0e19\u0e2d\u0e23\u0e4c\u0e22\u0e35\u0e48 \u0e40\u0e1f\u0e34\u0e23\u0e4c\u0e2a (Terminal Substation)",
@@ -3421,7 +3429,7 @@ function postViaForm(url, jsonBody) {
 async function saveToSheet(report){
   try{
     const subCode = (report.substation||'').split(' — ')[0].trim() || report.substation || '';
-    const reportWithSubName = {...report, subName: SUB_NAMES[subCode] || subCode};
+    const reportWithSubName = {...report, subName: getSubName(subCode) || subCode};
     const payload = JSON.stringify({action:"save", report:reportWithSubName});
     // ใช้ hidden form POST — ไม่มี CORS เลย
     await postViaForm(SCRIPT_URL, payload);
@@ -3492,6 +3500,21 @@ const B22_DB = {
   "UAA":[{code:"UAA01VB-01",affected:"\u0e2d.\u0e40\u0e21\u0e37\u0e2d\u0e07\u0e2d\u0e38\u0e17\u0e31\u0e22\u0e1a\u0e32\u0e07\u0e2a\u0e48\u0e27\u0e19"},{code:"UAA02VB-01",affected:"\u0e2d.\u0e2a\u0e27\u0e48\u0e32\u0e07\u0e2d\u0e32\u0e23\u0e21\u0e13\u0e4c \u0e15.\u0e44\u0e1c\u0e48\u0e40\u0e02\u0e35\u0e22\u0e27, \u0e15.\u0e14\u0e2d\u0e19\u0e02\u0e27\u0e32\u0e07, \u0e15.\u0e17\u0e38\u0e48\u0e07\u0e43\u0e2b\u0e0d\u0e48"},{code:"UAA02VR-101",affected:"\u0e21\u0e2b\u0e32\u0e27\u0e34\u0e17\u0e22\u0e32\u0e25\u0e31\u0e22\u0e23\u0e32\u0e21\u0e04\u0e33\u0e41\u0e2b\u0e07,\u0e1a\u0e49\u0e32\u0e19\u0e08\u0e31\u0e01\u0e29\u0e32"},{code:"UAA02VR-102",affected:"\u0e1a\u0e49\u0e32\u0e19\u0e2b\u0e19\u0e2d\u0e07\u0e1e\u0e23\u0e2b\u0e21\u0e2b\u0e19\u0e48\u0e2d"},{code:"UAA02VR-103",affected:"\u0e2d.\u0e2a\u0e27\u0e48\u0e32\u0e07\u0e2d\u0e32\u0e23\u0e21\u0e13\u0e4c"},{code:"UAA02VR-104",affected:"\u0e2d.\u0e2a\u0e27\u0e48\u0e32\u0e07\u0e2d\u0e32\u0e23\u0e21\u0e13\u0e4c (\u0e1a\u0e32\u0e07\u0e2a\u0e48\u0e27\u0e19)"},{code:"UAA03VB-01",affected:"\u0e2d.\u0e2b\u0e19\u0e2d\u0e07\u0e02\u0e32\u0e2b\u0e22\u0e48\u0e32\u0e07(\u0e1d\u0e31\u0e48\u0e07\u0e02\u0e27\u0e32)"},{code:"UAA04VB-01",affected:"\u0e15\u0e31\u0e27\u0e40\u0e21\u0e37\u0e2d\u0e07\u0e2b\u0e19\u0e2d\u0e07\u0e09\u0e32\u0e07(\u0e1a\u0e32\u0e07\u0e2a\u0e48\u0e27\u0e19),\u0e2d.\u0e2b\u0e19\u0e2d\u0e07\u0e02\u0e32\u0e2b\u0e22\u0e48\u0e32\u0e07(\u0e1d\u0e31\u0e48\u0e07\u0e0b\u0e49\u0e32\u0e22)"},{code:"UAA04VR-101",affected:"\u0e2d.\u0e2b\u0e19\u0e2d\u0e07\u0e02\u0e32\u0e2b\u0e22\u0e48\u0e32\u0e07"},{code:"UAA05VB-01",affected:"\u0e2d.\u0e17\u0e31\u0e1e\u0e17\u0e31\u0e19,\u0e2d.\u0e2a\u0e27\u0e48\u0e32\u0e07\u0e2d\u0e32\u0e23\u0e21\u0e13\u0e4c"},{code:"UAA05VR-102",affected:"\u0e2d.\u0e17\u0e31\u0e1e\u0e17\u0e31\u0e19,\u0e2d.\u0e2a\u0e48\u0e27\u0e32\u0e07\u0e2d\u0e32\u0e23\u0e21\u0e13\u0e4c"},{code:"UAA05VR-102",affected:"\u0e2d.\u0e17\u0e31\u0e1e\u0e17\u0e31\u0e19,\u0e2d.\u0e2a\u0e48\u0e27\u0e32\u0e07\u0e2d\u0e32\u0e23\u0e21\u0e13\u0e4c"},{code:"UAA05VR-103",affected:"\u0e2d.\u0e17\u0e31\u0e1e\u0e17\u0e31\u0e19"},{code:"UAA05VR-104",affected:"\u0e2d.\u0e2a\u0e27\u0e48\u0e32\u0e07\u0e2d\u0e32\u0e23\u0e21\u0e13\u0e4c"},{code:"UAA05VR-105",affected:"\u0e15.\u0e44\u0e1c\u0e48\u0e40\u0e02\u0e35\u0e22\u0e27"},{code:"UAA06VB-01",affected:"\u0e2d.\u0e40\u0e21\u0e37\u0e2d\u0e07\u0e2d\u0e38\u0e17\u0e31\u0e22\u0e18\u0e32\u0e19\u0e35"},{code:"UAA07VB-01",affected:"\u0e42\u0e23\u0e07\u0e41\u0e23\u0e21\u0e2b\u0e31\u0e27\u0e22\u0e02\u0e32\u0e41\u0e02\u0e47\u0e07,\u0e41\u0e22\u0e01\u0e01\u0e2d\u0e07\u0e01\u0e31\u0e1a \u0e08.\u0e2d\u0e38\u0e17\u0e31\u0e22\u0e18\u0e32\u0e19\u0e35"},{code:"UAA07VR-101",affected:"\u0e1a.\u0e14\u0e2d\u0e19\u0e01\u0e23\u0e30\u0e0a\u0e32\u0e22"},{code:"UAA07VR-102",affected:"\u0e27\u0e31\u0e14\u0e40\u0e19\u0e34\u0e19\u0e40\u0e2b\u0e25\u0e47\u0e01"},{code:"UAA08VB-01",affected:"\u0e2d.\u0e2b\u0e19\u0e2d\u0e07\u0e09\u0e32\u0e07,\u0e42\u0e23\u0e07\u0e1e\u0e22\u0e32\u0e1a\u0e32\u0e25\u0e2b\u0e19\u0e2d\u0e07\u0e09\u0e32\u0e07"},{code:"UAA09VB-01",affected:"\u0e2d.\u0e2b\u0e19\u0e2d\u0e07\u0e09\u0e32\u0e07(\u0e1a\u0e32\u0e07\u0e2a\u0e48\u0e27\u0e19),\u0e15.\u0e15\u0e25\u0e38\u0e01\u0e14\u0e39\u0e48"},{code:"UAA09VR-101",affected:"\u0e15.\u0e2d\u0e38\u0e17\u0e31\u0e22\u0e40\u0e01\u0e48\u0e32,\u0e15.\u0e15\u0e25\u0e38\u0e01\u0e14\u0e39\u0e48"},{code:"UAA09VR-102",affected:"\u0e1a.\u0e2b\u0e19\u0e2d\u0e07\u0e2b\u0e0d\u0e49\u0e32\u0e1b\u0e25\u0e49\u0e2d\u0e07\u0e2d.\u0e17\u0e31\u0e1e\u0e17\u0e31\u0e19"},{code:"UAA09VR-103",affected:"\u0e1a.\u0e15\u0e25\u0e38\u0e01\u0e14\u0e39\u0e48,\u0e1a.\u0e2a\u0e32\u0e25\u0e35\u0e48"},{code:"UAA10VB-01",affected:"\u0e27.\u0e40\u0e17\u0e04\u0e19\u0e34\u0e04\u0e2d\u0e38\u0e17\u0e31\u0e22\u0e18\u0e32\u0e19\u0e35,\u0e15.\u0e17\u0e48\u0e32\u0e0b\u0e38\u0e07"},{code:"UAA10VR-101",affected:"\u0e41\u0e22\u0e01\u0e44\u0e1f\u0e41\u0e14\u0e07\u0e27\u0e31\u0e14\u0e2a\u0e34\u0e07\u0e2b\u0e4c"},{code:"UAA10VR-102",affected:"\u0e40\u0e23\u0e37\u0e2d\u0e19\u0e1b\u0e23\u0e32\u0e13\u0e35,\u0e27\u0e31\u0e14\u0e17\u0e48\u0e32\u0e0b\u0e38\u0e07,\u0e23\u0e23.\u0e27\u0e31\u0e14\u0e17\u0e48\u0e32\u0e0b\u0e38\u0e07"}],
   "WIR":[{code:"WIR01R-01",affected:"\u0e1a\u0e49\u0e32\u0e19\u0e1a\u0e48\u0e2d\u0e23\u0e31\u0e07,\u0e2a\u0e16\u0e32\u0e19\u0e35\u0e2a\u0e39\u0e1a\u0e19\u0e49\u0e33\u0e1a\u0e49\u0e32\u0e19\u0e43\u0e2b\u0e21\u0e48"},{code:"WIR01VB-01",affected:"\u0e2d.\u0e27\u0e34\u0e40\u0e0a\u0e35\u0e22\u0e23\u0e1a\u0e38\u0e23\u0e35"},{code:"WIR02R-01",affected:"\u0e1a.\u0e0b\u0e31\u0e1a\u0e15\u0e30\u0e40\u0e04\u0e35\u0e22\u0e19 \u0e15.\u0e1e\u0e38\u0e40\u0e15\u0e22"},{code:"WIR02R-02",affected:"\u0e1a.\u0e2b\u0e19\u0e2d\u0e07\u0e40\u0e04\u0e25\u0e49\u0e32, \u0e1a.\u0e2b\u0e19\u0e2d\u0e07\u0e02\u0e32\u0e21"},{code:"WIR02R-03",affected:"\u0e1a\u0e49\u0e32\u0e19\u0e1f\u0e38\u0e1a\u0e2a\u0e30\u0e41\u0e01,\u0e1a\u0e49\u0e32\u0e19\u0e2b\u0e19\u0e2d\u0e07\u0e02\u0e32\u0e21\u0e43\u0e15\u0e49,\u0e1a\u0e49\u0e32\u0e19\u0e2b\u0e34\u0e19\u0e14\u0e32\u0e14"},{code:"WIR02R-04",affected:"\u0e1a\u0e49\u0e32\u0e19\u0e25\u0e33\u0e40\u0e1e\u0e35\u0e22\u0e23"},{code:"WIR02VB-01",affected:"\u0e1a.\u0e25\u0e33\u0e01\u0e23\u0e30\u0e17\u0e34\u0e07, \u0e1a.\u0e40\u0e02\u0e32\u0e0a\u0e19"},{code:"WIR03R-01",affected:"\u0e2d.\u0e28\u0e23\u0e35\u0e40\u0e17\u0e1e (\u0e1a\u0e32\u0e07\u0e2a\u0e48\u0e27\u0e19)"},{code:"WIR03VB-01",affected:"\u0e2d.\u0e28\u0e23\u0e35\u0e40\u0e17\u0e1e (\u0e1a\u0e32\u0e07\u0e2a\u0e48\u0e27\u0e19)"},{code:"WIR04R-01",affected:"\u0e2d.\u0e28\u0e23\u0e35\u0e40\u0e17\u0e1e (\u0e1a\u0e32\u0e07\u0e2a\u0e48\u0e27\u0e19)"},{code:"WIR04VB-01",affected:"\u0e2d.\u0e28\u0e23\u0e35\u0e40\u0e17\u0e1e (\u0e1a\u0e32\u0e07\u0e2a\u0e48\u0e27\u0e19)"},{code:"WIR05VB-01",affected:"\u0e15.\u0e1e\u0e38\u0e40\u0e15\u0e22"},{code:"WIR06VB-01",affected:"\u0e15.\u0e1e\u0e38\u0e02\u0e32\u0e21,\u0e15.\u0e1e\u0e38\u0e40\u0e15\u0e22 \u0e2d.\u0e27\u0e34\u0e40\u0e0a\u0e35\u0e22\u0e23\u0e1a\u0e38\u0e23\u0e35"},{code:"WIR07VB-01",affected:"\u0e2d.\u0e28\u0e23\u0e35\u0e40\u0e17\u0e1e (\u0e1a\u0e32\u0e07\u0e2a\u0e48\u0e27\u0e19)"},{code:"WIR08R-01",affected:"\u0e2a\u0e32\u0e21\u0e41\u0e22\u0e01\u0e44\u0e1f\u0e09\u0e32\u0e22 \u0e2d.\u0e28\u0e23\u0e35\u0e40\u0e17\u0e1e"},{code:"WIR08R-01/1",affected:"\u0e1a.\u0e2a\u0e21\u0e42\u0e20\u0e0a\u0e19\u0e4c"},{code:"WIR08VB-01",affected:"\u0e1a.\u0e04\u0e25\u0e2d\u0e07\u0e01\u0e23\u0e30\u0e08\u0e31\u0e07, \u0e2d.\u0e28\u0e23\u0e35\u0e40\u0e17\u0e1e"},{code:"WIR2BVB-01",affected:"\u0e2d.\u0e27\u0e34\u0e40\u0e0a\u0e35\u0e22\u0e23\u0e1a\u0e38\u0e38\u0e23\u0e35, \u0e2d.\u0e28\u0e23\u0e35\u0e40\u0e17\u0e1e, \u0e1e\u0e38\u0e40\u0e15\u0e22"},{code:"WIR01R-02",affected:"\u0e15.\u0e17\u0e48\u0e32\u0e42\u0e23\u0e07"}],
 };
+// SUB NAMES: fetch จาก Apps Script via JSONP → fallback เป็น SUB_NAMES (hardcode)
+async function loadSubNames(){
+  try{
+    const data = await fetchJSONP(SCRIPT_URL + "?type=subnames");
+    if(data && typeof data === "object" && Object.keys(data).length > 10){
+      console.log("SUB_NAMES loaded from Sheet:", Object.keys(data).length, "entries");
+      return data;
+    }
+    throw new Error("invalid data");
+  } catch(e){
+    console.warn("SUB_NAMES fetch failed, using hardcoded:", e.message);
+    return SUB_NAMES;
+  }
+}
+
 // B115: fetch จาก Apps Script via JSONP → fallback เป็น SUBSTATION_DB (hardcode)
 async function loadB115(){
   try{
@@ -4079,7 +4102,7 @@ function buildStatsView(){
   <div class="card" style="margin-bottom:8px">
     <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
       <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:700;color:#90b8e8;margin-bottom:4px">⚡ ${r.breakerCode} — ${SUB_NAMES[(r.substation||'').split(' — ')[0].trim()]||r.substation||''}</div>
+        <div style="font-size:13px;font-weight:700;color:#90b8e8;margin-bottom:4px">⚡ ${r.breakerCode} — ${getSubName((r.substation||'').split(' — ')[0].trim())||r.substation||''}</div>
         <div style="font-size:11px;font-weight:700;margin-bottom:2px">
           <span style="color:${r.eventType==='minor'?'#ffd050':'#ff6060'}">${r.eventType==='minor'?'🔌 Minor':'⚡ Major'}</span>
           <span style="color:var(--blue2);margin-left:6px">${r.tripType||""}</span>
@@ -4386,7 +4409,7 @@ window.exportReport=function(id){
   const relayStr=r.relay||"-";
   const bkCode=(r.breakerCode||"").replace(/['"<>&]/g,"");
   const _subCode2=(r.substation||'').split(' — ')[0].trim()||r.substation||'';
-  const subName=SUB_NAMES[_subCode2]||(r.substation||'–').replace(/^[A-Z0-9_\/]+ — /,'');
+  const subName=getSubName(_subCode2)||(r.substation||'–').replace(/^[A-Z0-9_\/]+ — /,'');
   const htmlParts = [
     '<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8">',
     '<style>',
@@ -4518,7 +4541,7 @@ window.exportFormReport = function(id) {
   const dateStr  = formatThaiDate(r.date);
   // ดึงชื่อสถานีไฟฟ้าจาก SUB_NAMES map
   const _subCode = (r.substation||'').split(' — ')[0].trim() || r.substation || '';
-  const subName  = SUB_NAMES[_subCode] || (r.substation||'–').replace(/^[A-Z0-9_/]+ — /,'').trim() || '–';
+  const subName  = getSubName(_subCode) || (r.substation||'–').replace(/^[A-Z0-9_/]+ — /,'').trim() || '–';
   const bkCode   = r.breakerCode || '–';
   const relay    = r.relay || '–';
   const phase    = r.phase || '–';
@@ -4699,13 +4722,15 @@ document.addEventListener("DOMContentLoaded",async()=>{
   // Load reports and B22 in parallel
   // โหลด B115, B22 และ DIST พร้อมกัน (live จาก Sheet)
   setState({minorDB:B22_DB, minorDBLoaded:true, majorDB:SUBSTATION_DB},false);
-  const [data, liveB22, liveB115, liveDist] = await Promise.all([
+  const [data, liveB22, liveB115, liveDist, liveSubNames] = await Promise.all([
     fetchReports(),
     loadB22(),
     loadB115(),
     loadDistLive(),
+    loadSubNames(),
   ]);
   if(liveDist && liveDist.length > 100) distLiveCache = liveDist;
+  if(liveSubNames && Object.keys(liveSubNames).length > 10) subNamesCache = liveSubNames;
   setState({
     reports: data,
     syncing: false,
