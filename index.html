@@ -764,15 +764,14 @@ function triggerDistCalc(force=false){
 }
 
 function buildRestorePicker(field,value){
-  const isDash=!value||value==="-";
+  const isDash=!value||value==="-"||value==="";
   const h=isDash?"00":(value||"00:00").split(":")[0];
   const m=isDash?"00":(value||"00:00").split(":")[1];
   const hours=Array.from({length:24},(_,i)=>String(i).padStart(2,"0"));
   const mins=Array.from({length:60},(_,i)=>String(i).padStart(2,"0"));
   return`
 <div style="display:flex;gap:6px;align-items:center">
-  <button onclick="setForm({${field}:${isDash?"'00:00'":"\"'-'\"".replace(/'/g,"'")}})" style="width:36px;height:36px;border-radius:7px;background:${isDash?"#1a3a6a":"var(--bg3)"};border:1.5px solid ${isDash?"var(--blue)":"var(--border)"};color:${isDash?"var(--blue3)":"var(--muted)"};font-weight:700;font-size:16px;cursor:pointer"
-    onclick="toggleRestore('${field}',${isDash})">${isDash?"+":"−"}</button>
+  <button onclick="${isDash?`setForm({${field}:'00:00'})`:`setForm({${field}:'-'})`}" style="width:36px;height:36px;border-radius:7px;background:${isDash?"#1a3a6a":"var(--bg3)"};border:1.5px solid ${isDash?"var(--blue)":"var(--border)"};color:${isDash?"var(--blue3)":"var(--muted)"};font-weight:700;font-size:16px;cursor:pointer;font-family:Sarabun,sans-serif">${isDash?"+":"−"}</button>
   ${isDash?`<div style="flex:1;background:var(--bg3);border:1.5px solid var(--border);border-radius:7px;padding:8px 12px;color:var(--muted);font-size:14px;text-align:center">–</div>`:`
   <select onchange="updateRestoreH('${field}','${m}',this.value)">${hours.map(hh=>`<option value="${hh}"${hh===h?" selected":""}>${hh}</option>`).join("")}</select>
   <span style="color:var(--blue3);font-weight:700">:</span>
