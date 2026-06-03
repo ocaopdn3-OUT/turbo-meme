@@ -260,10 +260,9 @@ async function loadB115(){
       const db = {};
       Object.entries(data).forEach(([sub, items]) => {
         const label = SUB_NAMES[sub] || sub;
-        const key = sub + " — " + label;
         const breakers = {};
         items.forEach(b => { breakers[b.code] = {line:b.line||"", affected:b.affected||""}; });
-        db[key] = {label, breakers};
+        db[sub] = {label, breakers};
       });
       return db;
     }
@@ -424,20 +423,7 @@ async function handleSave(){
 }
 function handleEdit(r){
   let form={...r};
-  // ถ้า affected ว่าง ให้ดึงจาก DB (B115/B22) มา fallback
-  if(!form.affected){
-    const sub=form.substation||"";
-    const code=form.breakerCode||"";
-    if(form.eventType==="minor"){
-      const db=state.minorDB[sub]||[];
-      const fd=db.find(x=>x.code===code);
-      if(fd)form.affected=fd.affected||"";
-    } else {
-      const bd=(state.majorDB&&state.majorDB[sub]?state.majorDB[sub]:{})?.[code]||
-               (state.majorDB&&state.majorDB[sub]?state.majorDB[sub]:{})?.breakers?.[code];
-      if(bd)form.affected=bd.affected||"";
-    }
-  }
+  if(!form.affected) form.affected=getAffected(r);
   setState({form,editingId:r.id,view:"form"});
 }
 async function handleDelete(id){
@@ -538,8 +524,8 @@ function buildHeader(){
 function buildFormView(){
   const f=state.form;
   const substations=Object.keys(state.majorDB&&Object.keys(state.majorDB).length>0?state.majorDB:SUBSTATION_DB).sort();
-  const breakers=f.substation?Object.keys((state.majorDB&&state.majorDB[f.substation]?state.majorDB[f.substation]:SUBSTATION_DB[f.substation]||{})?.breakers||{}).sort():[];
-  const bdData=f.substation&&f.breakerCode?(state.majorDB&&state.majorDB[f.substation]?state.majorDB[f.substation]:SUBSTATION_DB[f.substation]||{})?.breakers?.[f.breakerCode]:null;
+  const breakers=f.substation?Object.keys((getMajorEntry(f.substation)||{})?.breakers||{}).sort():[];
+  const bdData=f.substation&&f.breakerCode?(getMajorEntry(f.substation)||{})?.breakers?.[f.breakerCode]:null;
 
   // Event type selector
   const evSel=`
@@ -587,12 +573,12 @@ function buildFormView(){
       ${f.eventType==="minor"?`
       <select onchange="handleMinorSubChange(this.value)">
         <option value="">-- เลือกสถานี --</option>
-        ${minorSubs.map(s=>{const lbl=s.includes(' — ')?s.split(' — ')[0].trim():s;return '<option value="'+s+'"'+(s===f.substation?' selected':'')+'>'+lbl+'</option>';}).join("")}
+        ${minorSubs.map(s=>'<option value="'+s+'"'+(s===f.substation?' selected':'')+'>'+s+'</option>').join("")}
         ${!state.minorDBLoaded?'<option disabled>⏳ กำลังโหลด...</option>':""}
       </select>`:`
       <select onchange="handleSubChange(this.value)">
         <option value="">-- เลือกสถานี --</option>
-        ${substations.map(s=>{const lbl=s.includes(" — ")?s.split(" — ")[0].trim():s;return opt(s,lbl,f.substation);}).join("")}
+        ${substations.map(s=>opt(s,s,f.substation)).join("")}
       </select>`}
     </div>
     <div><div class="lbl">รหัสอุปกรณ์${f.eventType==="minor"?' <span class="badge" style="background:#2a2000;color:#ffd050;border:1px solid #665500">Feeder</span>':''}</div>
@@ -1176,7 +1162,7 @@ window.handleSubChange=function(v){
 };
 window.handleBreakerChange=function(v){
   const f=state.form;
-  const bd=f.substation?(state.majorDB&&state.majorDB[f.substation]?state.majorDB[f.substation]:SUBSTATION_DB[f.substation]||{})?.breakers?.[v]:null;
+  const bd=f.substation?(getMajorEntry(f.substation)||{})?.breakers?.[v]:null;
   setForm({breakerCode:v,line:bd?bd.line:"",affected:bd?bd.affected:""});
 };
 window.updateDate=function(target,field,val){
@@ -1288,7 +1274,7 @@ window.exportReport=function(id){
     '</table>',
     '<span class="sbar2">② พื้นที่ได้รับผลกระทบ</span>',
     '<table class="tbl" style="table-layout:fixed;width:100%"><col style="width:28%"><col style="width:72%">',
-    '<tr><td class="lbl">พื้นที่ได้รับผลกระทบ :</td><td class="val vg" style="white-space:normal;word-break:break-word">'+(r.affected||'–')+'</td></tr>',
+    '<tr><td class="lbl">พื้นที่ได้รับผลกระทบ :</td><td class="val vg" style="white-space:normal;word-break:break-word">'+(getAffected(r)||'–')+'</td></tr>',
     '</table>',
     '<span class="sbar2">③ การจ่ายไฟคืน</span>',
     '<table class="tbl" style="table-layout:fixed;width:100%"><col style="width:28%"><col style="width:22%"><col style="width:28%"><col style="width:22%">',
@@ -1345,6 +1331,35 @@ window.exportReport=function(id){
 // ══════════════════════════════════════════
 // FORM REPORT (แบบฟอร์มรายงาน)
 // ══════════════════════════════════════════
+
+// helper: ดึง entry จาก majorDB รับได้ทั้ง "BQA" และ "BQA — บ้านไร่"
+function getMajorEntry(sub){
+  if(!sub||!state.majorDB) return null;
+  const code=sub.includes(" — ")?sub.split(" — ")[0].trim():sub;
+  return state.majorDB[code]||null;
+}
+
+// helper: ดึง affected จาก majorDB/minorDB ถ้า r.affected ว่าง
+// minorDB key = "BQA" (code สั้น จาก Sheet col A)
+// majorDB key = "BQA — บ้านไร่" (แปลงใน loadB115) value = {label, breakers:{code:{affected,line}}}
+function getAffected(r){
+  if(r.affected) return r.affected;
+  const sub=r.substation||"", code=r.breakerCode||"";
+  // subCode = ส่วนก่อน — เช่น "BQA"
+  const subCode=sub.includes(" — ")?sub.split(" — ")[0].trim():sub;
+  if(r.eventType==="minor"){
+    // minorDB: key="BQA", value=[{code,affected},...]
+    const db=state.minorDB[subCode]||state.minorDB[sub]||[];
+    const fd=db.find(x=>x.code===code);
+    return fd?fd.affected||"":"";
+  } else {
+    // majorDB: key="BQA — บ้านไร่", value={label,breakers:{code:{affected,line}}}
+    // หาจาก key ที่ขึ้นต้นด้วย subCode+" — "
+    const entry=getMajorEntry(sub);
+    return entry?.breakers?.[code]?.affected||"";
+  }
+}
+
 window.exportFormReport = function(id) {
   const r = state.reports.find(x => String(x.id) === String(id));
   if (!r) return;
@@ -1360,7 +1375,7 @@ window.exportFormReport = function(id) {
   const weather  = r.weather || '–';
   const load     = r.load  || '–';
   const trip     = r.tripType || '–';
-  const affected = r.affected || '–';
+  const affected = getAffected(r) || '–';
   const isMinor  = r.eventType === 'minor' ||
     (r.tripType === 'T/R2' || r.tripType === 'T/L');
 
