@@ -65,7 +65,7 @@ textarea{resize:vertical}
 // ══════════════════════════════════════════
 // SCRIPT_URL — Google Apps Script
 // ══════════════════════════════════════════
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzV4Z-Byoq6bNx6Mx3C44F-XzFHn7fV4MZinrFwq26oVMrgUgDrhSqp2tuq9P9G5XUP/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzva8NAY3KEifdXqbI7Bs0yZOGJ4laSyf_Nyj2_zeIViAUUXRulb_MGA69coCUYawG6/exec";
 const SHEET_ID   = "1LSqtQ5aOx7qlJP7gyivMTDi0l2zGnFgPD7V--pZlYfk";
 
 // ══════════════════════════════════════════
@@ -423,6 +423,21 @@ async function handleSave(){
 }
 function handleEdit(r){
   let form={...r};
+  // fallback: ถ้าข้อมูลบางฟิลด์หาย (จาก Apps Script เดิม) ให้ดึงจาก localStorage แทน
+  const localReports = JSON.parse(localStorage.getItem('faultReports')||'[]');
+  const local = localReports.find(x=>String(x.id)===String(r.id));
+  if(local){
+    // เติมเฉพาะ field ที่ว่างใน r แต่มีใน local
+    const fillFields = ['causeText','action','note','firstRestore','fullRestore','affected',
+                        'ia','ib','ic','ig','zone','load','relay','phase','weather','tripType',
+                        'causeCategory','causeSolved','line'];
+    fillFields.forEach(k=>{
+      if((form[k]===undefined||form[k]===""||(form[k]===null&&k==='causeSolved'))
+         && local[k]!==undefined && local[k]!==null && local[k]!==""){
+        form[k]=local[k];
+      }
+    });
+  }
   if(!form.affected) form.affected=getAffected(r);
   setState({form,editingId:r.id,view:"form"});
 }
@@ -1079,7 +1094,7 @@ window.exportExcel = function() {
   if(!filtered.length){ showToast("ไม่มีข้อมูลสำหรับ export","error"); return; }
 
   // สร้าง CSV (UTF-8 BOM สำหรับ Excel ภาษาไทย)
-  const headers = ["วันที่","เวลา","สถานีไฟฟ้า","รหัสอุปกรณ์","ประเภท","การทำงาน","Relay","เฟส","IFA","IFB","IFC","IFG","ระยะทาง(กม.)","อากาศ","โหลด(MW)","ผลตรวจสอบ","สาเหตุ","ประเภทสาเหตุ","การดำเนินการ","หมายเหตุ"];
+  const headers = ["วันที่","เวลา","สถานีไฟฟ้า","รหัสอุปกรณ์","ประเภท","การทำงาน","Relay","เฟส","IFA","IFB","IFC","IFG","ระยะทาง(กม.)","อากาศ","โหลด(MW)","ผลตรวจสอบ","สาเหตุ","ประเภทสาเหตุ","จ่ายไฟครั้งแรก","จ่ายไฟได้ทั้งหมด","การดำเนินการ","หมายเหตุ","พื้นที่ผลกระทบ"];
 
   const escape = v => {
     const s = String(v||"").replace(/"/g,'""');
@@ -1102,8 +1117,11 @@ window.exportExcel = function() {
     r.causeSolved===true?"พบสาเหตุ":r.causeSolved===false?"ไม่พบสาเหตุ":"",
     r.causeText||"",
     r.causeCategory||"",
+    r.firstRestore||"",
+    r.fullRestore||"",
     r.action||"",
     r.note||"",
+    getAffected(r)||"",
   ]);
 
   const csv = "\uFEFF" + [headers, ...rows].map(row => row.map(escape).join(",")).join("\n");
