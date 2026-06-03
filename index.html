@@ -65,7 +65,7 @@ textarea{resize:vertical}
 // ══════════════════════════════════════════
 // SCRIPT_URL — Google Apps Script
 // ══════════════════════════════════════════
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyUbi7ViMYUfr8PKnJ7NMNO-kjb8B9yvoQ0T3PkNKV8oddffbp-Rpdq6Iqg7OH3TBj4/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzV4Z-Byoq6bNx6Mx3C44F-XzFHn7fV4MZinrFwq26oVMrgUgDrhSqp2tuq9P9G5XUP/exec";
 const SHEET_ID   = "1LSqtQ5aOx7qlJP7gyivMTDi0l2zGnFgPD7V--pZlYfk";
 
 // ══════════════════════════════════════════
@@ -422,7 +422,24 @@ async function handleSave(){
   await saveToSheet(entry);
   showToast("บันทึกเรียบร้อย ✓");
 }
-function handleEdit(r){setState({form:{...r},editingId:r.id,view:"form"})}
+function handleEdit(r){
+  let form={...r};
+  // ถ้า affected ว่าง ให้ดึงจาก DB (B115/B22) มา fallback
+  if(!form.affected){
+    const sub=form.substation||"";
+    const code=form.breakerCode||"";
+    if(form.eventType==="minor"){
+      const db=state.minorDB[sub]||[];
+      const fd=db.find(x=>x.code===code);
+      if(fd)form.affected=fd.affected||"";
+    } else {
+      const bd=(state.majorDB&&state.majorDB[sub]?state.majorDB[sub]:{})?.[code]||
+               (state.majorDB&&state.majorDB[sub]?state.majorDB[sub]:{})?.breakers?.[code];
+      if(bd)form.affected=bd.affected||"";
+    }
+  }
+  setState({form,editingId:r.id,view:"form"});
+}
 async function handleDelete(id){
   if(!confirm("ยืนยันการลบรายงานนี้?"))return;
   const updated=state.reports.filter(r=>r.id!==id);
