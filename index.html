@@ -65,7 +65,7 @@ textarea{resize:vertical}
 // ══════════════════════════════════════════
 // SCRIPT_URL — Google Apps Script
 // ══════════════════════════════════════════
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz-d6ylwuhr4-s297dAASmryHFSQX-r54B2pnIsRhaOca0Ebk-HmUfCqsDOU0u6_EkU/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3JmHCQaOUd7mqSmehyRdo5y-IeCpCQfIuNQA-Mi4HWRIJZR6s0qe5c-42OpsAw_on/exec";
 const SHEET_ID   = "1LSqtQ5aOx7qlJP7gyivMTDi0l2zGnFgPD7V--pZlYfk";
 
 // ══════════════════════════════════════════
@@ -3696,6 +3696,10 @@ function buildApp(){
   <button onclick="closeFormModal()" style="position:fixed;top:14px;right:18px;z-index:9999;background:#333;color:#fff;border:none;border-radius:50%;width:36px;height:36px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.5)">✕</button>
   <div class="modal-box"><div id="form-modal-content"></div></div>
 </div>
+<div id="report-modal" style="display:none" class="modal-overlay" onclick="if(event.target===this)closeReportModal()">
+  <button onclick="closeReportModal()" style="position:fixed;top:14px;right:18px;z-index:9999;background:#333;color:#fff;border:none;border-radius:50%;width:36px;height:36px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.5)">✕</button>
+  <div class="modal-box" style="max-width:960px"><div id="report-modal-content"></div></div>
+</div>
   <div style="max-width:880px;margin:0 auto;padding:20px 14px">
     ${state.view==="form"?buildFormView():""}
     ${state.view==="stats"?buildStatsView():""}
@@ -3939,10 +3943,12 @@ function buildMinorFields(f,subCode){
 let distCalcTimer=null;
 function triggerDistCalc(force=false){
   if(distCalcTimer)clearTimeout(distCalcTimer);
-  distCalcTimer=setTimeout(()=>{
+  distCalcTimer=setTimeout(async()=>{
     const f=state.form;
     const sub=f.substation?f.substation.split(" — ")[0]:f.substation||"";
     if(!sub||!f.breakerCode)return;
+    // โหลด live dist ถ้ายังไม่มี
+    if(!distLiveCache) await loadDistLive();
     const dist=calcDist(sub,f.breakerCode,f.phase,f.ia,f.ib,f.ic,f.ig);
     setForm({calcDistance:dist,zone:dist==="-"?"-":`${dist} กม.`});
   },force?0:400);
@@ -4086,9 +4092,9 @@ function buildStatsView(){
       </div>
       <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
         <button class="btn-sm" title="แก้ไข" style="color:var(--blue2);background:var(--bg3);border-color:var(--border)" onclick='handleEdit(${JSON.stringify(r).replace(/'/g,"&#39;").replace(/"/g,"&quot;")})'>✏️</button>
-        <button class="btn-sm" title="รายงานละเอียด" style="color:#40e080;background:#0a1e10;border-color:#1a5030" onclick="exportReport(${r.id})">📄</button>
-        <button class="btn-sm" title="แบบฟอร์มรายงาน" style="color:#ffd050;background:#1a1400;border-color:#665500" onclick="exportFormReport(${r.id})">📋</button>
-        <button class="btn-sm" title="ลบ" style="color:#ff7070;background:#200808;border-color:#5a1a1a" onclick="handleDelete(${r.id})">🗑</button>
+        <button class="btn-sm" title="รายงานละเอียด" style="color:#40e080;background:#0a1e10;border-color:#1a5030" onclick="exportReport('${r.id}')">📄</button>
+        <button class="btn-sm" title="แบบฟอร์มรายงาน" style="color:#ffd050;background:#1a1400;border-color:#665500" onclick="exportFormReport('${r.id}')">📋</button>
+        <button class="btn-sm" title="ลบ" style="color:#ff7070;background:#200808;border-color:#5a1a1a" onclick="handleDelete('${r.id}')">🗑</button>
       </div>
     </div>
   </div>`).join("")}
@@ -4315,6 +4321,10 @@ window.calNav=function(dir){
   setState({calYear:y,calMonth:m});
 };
 
+window.closeReportModal=function(){
+  document.getElementById('report-modal').style.display='none';
+  document.getElementById('report-modal-content').innerHTML='';
+};
 window.closeFormModal=function(){
   document.getElementById('form-modal').style.display='none';
   document.getElementById('form-modal-content').innerHTML='';
@@ -4371,7 +4381,7 @@ window.handleEdit=handleEdit;
 window.handleDelete=handleDelete;
 window.triggerDistCalc=triggerDistCalc;
 window.exportReport=function(id){
-  const r=state.reports.find(x=>x.id===id);if(!r)return;
+  const r=state.reports.find(x=>String(x.id)===String(id));if(!r)return;
   const dateStr=formatThaiDate(r.date);
   const relayStr=r.relay||"-";
   const bkCode=(r.breakerCode||"").replace(/['"<>&]/g,"");
@@ -4483,16 +4493,18 @@ window.exportReport=function(id){
     '</'+'script>',
     '</body></html>'
   ];
-  // เปิด tab ใหม่แล้ว write HTML ตรงๆ ทุกครั้ง (ไม่มี URL expiry)
+  // แสดงใน modal แทน window.open (ไม่มีปัญหา popup blocker)
   const htmlContent = htmlParts.join('');
-  const newWin = window.open('about:blank', '_blank');
-  if(newWin) {
-    newWin.document.open('text/html');
-    newWin.document.write(htmlContent);
-    newWin.document.close();
-  } else {
-    showToast('กรุณาอนุญาต popup ใน browser ก่อนครับ','error');
-  }
+  const rm = document.getElementById('report-modal');
+  const rmc = document.getElementById('report-modal-content');
+  rmc.innerHTML = '';
+  rm.style.display = 'flex';
+  requestAnimationFrame(() => {
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'width:100%;height:85vh;border:none;border-radius:8px';
+    iframe.srcdoc = htmlContent;
+    rmc.appendChild(iframe);
+  });
 };
 
 
@@ -4500,7 +4512,7 @@ window.exportReport=function(id){
 // FORM REPORT (แบบฟอร์มรายงาน)
 // ══════════════════════════════════════════
 window.exportFormReport = function(id) {
-  const r = state.reports.find(x => x.id === id);
+  const r = state.reports.find(x => String(x.id) === String(id));
   if (!r) return;
 
   const dateStr  = formatThaiDate(r.date);
@@ -4685,13 +4697,15 @@ document.addEventListener("DOMContentLoaded",async()=>{
   render();
   setState({syncing:true},false);
   // Load reports and B22 in parallel
-  // โหลด B115 และ B22 พร้อมกัน (live จาก Sheet)
+  // โหลด B115, B22 และ DIST พร้อมกัน (live จาก Sheet)
   setState({minorDB:B22_DB, minorDBLoaded:true, majorDB:SUBSTATION_DB},false);
-  const [data, liveB22, liveB115] = await Promise.all([
+  const [data, liveB22, liveB115, liveDist] = await Promise.all([
     fetchReports(),
     loadB22(),
     loadB115(),
+    loadDistLive(),
   ]);
+  if(liveDist && liveDist.length > 100) distLiveCache = liveDist;
   setState({
     reports: data,
     syncing: false,
