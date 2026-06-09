@@ -56,8 +56,60 @@ textarea{resize:vertical}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
 .modal-box{background:#fff;border-radius:8px;width:100%;max-width:880px;max-height:88vh;overflow-y:auto;margin:auto}
 </style>
+
+<!-- Light theme (Mastercard) — dark theme CSS ข้างบนไม่ถูกแตะ -->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sofia+Sans:wght@400;500;600;700&display=swap');
+
+[data-theme="light"]{
+  --bg:#F3F0EE;--bg2:#FFFFFF;--bg3:#FCFBFA;
+  --border:#D1CDC7;--border2:#E8E4E0;
+  --blue:#3860BE;--blue2:#CF4500;--blue3:#F37338;
+  --green:#1a7a3a;--red:#EB001B;--yellow:#CF4500;
+  --text:#141413;--muted:#696969;
+}
+[data-theme="light"] body{font-family:'Sofia Sans','Sarabun',system-ui,sans-serif}
+[data-theme="light"] input,[data-theme="light"] select,[data-theme="light"] textarea{
+  background:#FFFFFF;border-color:#D1CDC7;color:#141413;font-family:'Sofia Sans','Sarabun',system-ui,sans-serif
+}
+[data-theme="light"] input:focus,[data-theme="light"] select:focus,[data-theme="light"] textarea:focus{
+  border-color:#141413;box-shadow:0 0 0 3px rgba(20,20,19,.06)
+}
+[data-theme="light"] select option{background:#FFFFFF;color:#141413}
+[data-theme="light"] .lbl{color:#696969}
+[data-theme="light"] .card{background:#FFFFFF;border-color:#E8E4E0;box-shadow:0 2px 12px rgba(20,20,19,.07);border-radius:16px}
+[data-theme="light"] .sec-title{color:#696969;border-color:#E8E4E0}
+[data-theme="light"] .sec-title::before{content:"• ";color:#CF4500}
+[data-theme="light"] .btn{font-family:'Sofia Sans','Sarabun',system-ui,sans-serif;border-radius:20px}
+[data-theme="light"] .btn-primary{background:#141413;color:#F3F0EE;border:1.5px solid #141413;box-shadow:0 2px 8px rgba(20,20,19,.18)}
+[data-theme="light"] .btn-primary:hover{opacity:.87;transform:translateY(-1px)}
+[data-theme="light"] .btn-sm{border-radius:20px;font-family:'Sofia Sans','Sarabun',system-ui,sans-serif}
+[data-theme="light"] .badge{border-radius:999px}
+[data-theme="light"] .bar-wrap{background:#E8E4E0;border-radius:999px}
+[data-theme="light"] .bar-fill{border-radius:999px}
+[data-theme="light"] .toast{border-radius:999px;border:1px solid rgba(0,0,0,.08)}
+[data-theme="light"] .tab-btn{font-family:'Sofia Sans','Sarabun',system-ui,sans-serif;border-radius:999px}
+[data-theme="light"] .tab-active{background:#141413;color:#F3F0EE;box-shadow:0 2px 8px rgba(20,20,19,.18)}
+[data-theme="light"] .tab-inactive{background:transparent;color:#696969;border:1.5px solid #D1CDC7}
+[data-theme="light"] .tab-inactive:hover{background:#FCFBFA;color:#141413;border-color:#141413}
+[data-theme="light"] .readonly-field{background:#f0faf4!important;color:#1a7a3a!important;border-color:#1a7a3a!important}
+[data-theme="light"] .cause-btn{background:#FFFFFF;font-family:'Sofia Sans','Sarabun',system-ui,sans-serif;border-radius:999px}
+[data-theme="light"] .event-type-btn{background:#FCFBFA;border-color:#D1CDC7;border-radius:16px}
+[data-theme="light"] .event-type-btn.active-major{border-color:#EB001B;background:rgba(235,0,27,.05)}
+[data-theme="light"] .event-type-btn.active-minor{border-color:#CF4500;background:rgba(207,69,0,.05)}
+[data-theme="light"] .cal-day{background:#FCFBFA;border-color:#E8E4E0;border-radius:8px}
+[data-theme="light"] .cal-day.has-ev{background:#FEF0E8;border-color:#CF4500}
+[data-theme="light"] ::-webkit-scrollbar-track{background:#F3F0EE}
+[data-theme="light"] ::-webkit-scrollbar-thumb{background:#D1CDC7}
+[data-theme="light"] .modal-overlay{background:rgba(0,0,0,.5);backdrop-filter:blur(4px)}
+[data-theme="light"] .modal-box{background:#FFFFFF;border:1px solid #E8E4E0;border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.1)}
+
+/* theme toggle button */
+.theme-toggle{width:36px;height:36px;border-radius:999px;border:1.5px solid var(--border2);background:var(--bg2);color:var(--text);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:15px;transition:all .18s;flex-shrink:0;vertical-align:middle}
+.theme-toggle:hover{opacity:.8;transform:scale(1.05)}
+</style>
 </head>
-<body>
+<body data-theme="dark">
 
 <div id="app"></div>
 
@@ -65,7 +117,7 @@ textarea{resize:vertical}
 // ══════════════════════════════════════════
 // SCRIPT_URL — Google Apps Script
 // ══════════════════════════════════════════
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzva8NAY3KEifdXqbI7Bs0yZOGJ4laSyf_Nyj2_zeIViAUUXRulb_MGA69coCUYawG6/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwDKgZgIeudrp6fMHoLcPomqt6fiBRgMQw1KY0XbE_r2jYHUvKv9VVRIYQ0VrgMZVH5/exec";
 const SHEET_ID   = "1LSqtQ5aOx7qlJP7gyivMTDi0l2zGnFgPD7V--pZlYfk";
 
 // ══════════════════════════════════════════
@@ -97,9 +149,10 @@ const TH_MONTHS = ["มกราคม","กุมภาพันธ์","มี
 const TH_MONTHS_SHORT = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
 const STORAGE_KEY = "fault_reports_v3";
 
-function getTodayTH(){const d=new Date();return{day:d.getDate(),month:d.getMonth()+1,year:d.getFullYear()+543}}
+function getTodayTH(){const d=new Date();return{day:d.getDate(),month:d.getMonth()+1,year:d.getFullYear()}}
 function getNowTime(){const d=new Date();return`${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`}
 function formatThaiDate(d){if(!d||typeof d!=="object")return d||"";return`${d.day} ${TH_MONTHS[d.month-1]} ${d.year}`}
+function formatThaiDateBE(d){if(!d||typeof d!=="object")return d||"";const y=d.year>2400?d.year:d.year+543;return`${d.day} ${TH_MONTHS[d.month-1]} ${y}`}
 function loadLocal(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]")}catch{return[]}}
 function saveLocal(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d))}
 
@@ -136,6 +189,7 @@ function newBlankForm(){
     causeText:"",action:"",note:"",
     causeSolved:null,causeCategory:"",
     ia:"",ib:"",ic:"",ig:"",calcDistance:"",
+    gfjZone:"",gfjSub:"",
     createdAt:"",
   };
 }
@@ -236,7 +290,19 @@ const B22_DB = {};
 // cache variables
 let subNamesCache = null;
 let distLiveCache = null;
+let gfjDB = {}; // {จุดรวมงาน: [รับผิดชอบ1, รับผิดชอบ2, ...]}
 // SUB NAMES: fetch จาก Apps Script via JSONP → fallback เป็น SUB_NAMES (hardcode)
+async function loadGFJ(){
+  try{
+    const data = await fetchJSONP(SCRIPT_URL + "?type=gfj");
+    if(data && typeof data === "object" && Object.keys(data).length > 0){
+      gfjDB = data;
+      console.log("GFJ loaded:", Object.keys(data).length, "zones");
+      setState({},false);
+    }
+  } catch(e){ console.warn("GFJ load failed:", e.message); }
+}
+
 async function loadSubNames(){
   try{
     const data = await fetchJSONP(SCRIPT_URL + "?type=subnames");
@@ -529,8 +595,15 @@ function buildHeader(){
     <div style="font-size:17px;font-weight:700">OUTAGE MANGEMENT REPORT</div>
     <div style="font-size:11px;color:var(--muted)">ระบบรายงานเหตุการณ์กระแสไฟฟ้าขัดข้อง${state.syncing?' <span style="animation:pulse 1.5s infinite;color:var(--blue2)">⏳ ซิงค์...</span>':''}</div>
   </div>
-  <div style="margin-left:auto;display:flex;gap:7px">${tabHtml}</div>
+  <div style="margin-left:auto;display:flex;gap:7px;align-items:center">${tabHtml}<button class="theme-toggle" onclick="toggleTheme()">${document.body.getAttribute('data-theme')==='light'?'🌙':'☀️'}</button></div>
 </div>`;
+}
+
+function toggleTheme(){
+  const next=document.body.getAttribute('data-theme')==='light'?'dark':'light';
+  document.body.setAttribute('data-theme',next);
+  localStorage.setItem('theme',next);
+  render();
 }
 
 // ══════════════════════════════════════════
@@ -570,6 +643,21 @@ function buildFormView(){
     <div><div class="lbl">สภาพอากาศ</div>
       <select onchange="setForm({weather:this.value})">
         ${WEATHER_OPTIONS.map(w=>opt(w,w,f.weather)).join("")}
+      </select>
+    </div>
+  </div>
+  <div class="grid2">
+    <div><div class="lbl">การไฟฟ้าจุดรวมงาน</div>
+      <select onchange="handleGFJZoneChange(this.value)">
+        <option value="">-- เลือก กฟฟ. --</option>
+        ${Object.keys(gfjDB).sort().map(z=>'<option value="'+z+'"'+(z===f.gfjZone?' selected':'')+'>'+z+'</option>').join("")}
+        ${Object.keys(gfjDB).length===0?'<option disabled>⏳ กำลังโหลด...</option>':""}
+      </select>
+    </div>
+    <div><div class="lbl">การไฟฟ้าที่รับผิดชอบ</div>
+      <select onchange="setForm({gfjSub:this.value})" ${!f.gfjZone?"disabled":""}>
+        <option value="">-- เลือก กฟฟ. --</option>
+        ${(gfjDB[f.gfjZone]||[]).map(s=>'<option value="'+s+'"'+(s===f.gfjSub?' selected':'')+'>'+s+'</option>').join("")}
       </select>
     </div>
   </div>
@@ -785,10 +873,10 @@ function buildRestorePicker(field,value){
 // ══════════════════════════════════════════
 function buildStatsView(){
   const{filterBreaker,filterDateFrom,filterDateTo,reports}=state;
-  const fromTS=filterDateFrom?new Date(filterDateFrom.year-543,filterDateFrom.month-1,filterDateFrom.day).getTime():null;
-  const toTS=filterDateTo?new Date(filterDateTo.year-543,filterDateTo.month-1,filterDateTo.day,23,59).getTime():null;
+  const fromTS=filterDateFrom?new Date(filterDateFrom.year,filterDateFrom.month-1,filterDateFrom.day).getTime():null;
+  const toTS=filterDateTo?new Date(filterDateTo.year,filterDateTo.month-1,filterDateTo.day,23,59).getTime():null;
   const toEventTS=r=>{
-    if(r.date&&typeof r.date==="object")return new Date(r.date.year-543,r.date.month-1,r.date.day).getTime();
+    if(r.date&&typeof r.date==="object")return new Date(r.date.year,r.date.month-1,r.date.day).getTime();
     const d=new Date(r.createdAt);return isNaN(d)?0:d.getTime();
   };
   const filterEventType=state.filterEventType;
@@ -938,7 +1026,7 @@ function buildCalendar(reports){
   const eventMap={};
   reports.forEach(r=>{
     let d;
-    if(r.date&&typeof r.date==="object"){d=new Date(r.date.year-543,r.date.month-1,r.date.day)}
+    if(r.date&&typeof r.date==="object"){d=new Date(r.date.year,r.date.month-1,r.date.day)}
     else{d=new Date(r.createdAt)}
     if(!isNaN(d)&&d.getFullYear()===year&&d.getMonth()===month){
       const day=d.getDate();
@@ -954,7 +1042,7 @@ function buildCalendar(reports){
   // Header + nav buttons
   let html=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
     <button onclick="calNav(-1)" style="background:#1a3a6a;border:1px solid var(--blue);color:var(--blue3);border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;font-family:Sarabun">‹</button>
-    <div style="font-weight:700;color:var(--blue);font-size:13px">${TH_MONTHS_SHORT[month]} ${year+543}</div>
+    <div style="font-weight:700;color:var(--blue);font-size:13px">${TH_MONTHS_SHORT[month]} ${year}</div>
     <button onclick="calNav(1)" style="background:#1a3a6a;border:1px solid var(--blue);color:var(--blue3);border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;font-family:Sarabun">›</button>
   </div>`;
 
@@ -985,7 +1073,7 @@ function buildCalendar(reports){
 // ══════════════════════════════════════════
 function buildInlineDatePicker(targetId,value,onChange){
   const v=value||getTodayTH();
-  const nowThai = new Date().getFullYear()+543;
+  const nowThai = new Date().getFullYear();
   const dataYears = (state.reports||[]).filter(r=>r.date&&r.date.year).map(r=>Number(r.date.year));
   const minYear = dataYears.length ? Math.min(...dataYears) : nowThai-3;
   const maxYear = Math.max(nowThai+5, dataYears.length ? Math.max(...dataYears)+1 : nowThai+5);
@@ -1026,7 +1114,7 @@ function buildInlineTimePicker(targetId,value){
 function attachEvents(){
   buildInlineDatePicker("date-picker-wrap",state.form.date,"form");
   buildInlineTimePicker("time-picker-wrap",state.form.time);
-  const nowThai = new Date().getFullYear()+543;
+  const nowThai = new Date().getFullYear();
   const dataYears = (state.reports||[]).filter(r=>r.date&&r.date.year).map(r=>Number(r.date.year));
   const minYear = dataYears.length ? Math.min(...dataYears) : nowThai-3;
   const maxYear = Math.max(nowThai+5, dataYears.length ? Math.max(...dataYears)+1 : nowThai+5);
@@ -1077,14 +1165,14 @@ function attachEvents(){
 window.exportExcel = function() {
   const {filterBreaker, filterEventType, filterDateFrom, filterDateTo, reports} = state;
 
-  const fromTS = filterDateFrom ? new Date(filterDateFrom.year-543, filterDateFrom.month-1, filterDateFrom.day).getTime() : null;
-  const toTS   = filterDateTo   ? new Date(filterDateTo.year-543,   filterDateTo.month-1,   filterDateTo.day, 23, 59).getTime() : null;
+  const fromTS = filterDateFrom ? new Date(filterDateFrom.year, filterDateFrom.month-1, filterDateFrom.day).getTime() : null;
+  const toTS   = filterDateTo   ? new Date(filterDateTo.year,   filterDateTo.month-1,   filterDateTo.day, 23, 59).getTime() : null;
 
   const filtered = reports.filter(r => {
     if(filterBreaker && !r.breakerCode?.toLowerCase().includes(filterBreaker.toLowerCase())) return false;
     if(filterEventType && r.eventType !== filterEventType) return false;
     const ts = r.date && typeof r.date==="object"
-      ? new Date(r.date.year-543, r.date.month-1, r.date.day).getTime() : 0;
+      ? new Date(r.date.year, r.date.month-1, r.date.day).getTime() : 0;
     if(fromTS && ts && ts < fromTS) return false;
     if(toTS   && ts && ts > toTS)   return false;
     return true;
@@ -1149,7 +1237,7 @@ window.calSelectDay=function(d,m,y){
     setState({calSelectedDay:null,filterDateFrom:null,filterDateTo:null});
     return;
   }
-  const thaiYear=y+543;
+  const thaiYear=y;
   const dayFilter={day:d,month:m+1,year:thaiYear};
   setState({calSelectedDay:{d,m,y},filterDateFrom:dayFilter,filterDateTo:dayFilter});
   setTimeout(()=>{
@@ -1177,6 +1265,10 @@ window.handleMinorFeedChange=function(v){
 window.handleSubChange=function(v){
   setForm({substation:v,breakerCode:"",relay:"",line:"",affected:""});
 };
+window.handleGFJZoneChange=function(zone){
+  setForm({gfjZone:zone, gfjSub:""});
+};
+
 window.handleBreakerChange=function(v){
   const f=state.form;
   const bd=f.substation?(getMajorEntry(f.substation)||{})?.breakers?.[v]:null;
@@ -1190,14 +1282,14 @@ window.updateDate=function(target,field,val){
     else if(field==="year")d.year=parseInt(val);
     setForm({date:d});
   } else if(target==="filter"){
-    const cur=state.filterDateFrom||{day:1,month:1,year:new Date().getFullYear()+543};
+    const cur=state.filterDateFrom||{day:1,month:1,year:new Date().getFullYear()};
     const d={...cur};
     if(field==="fday")d.day=parseInt(val);
     else if(field==="fmonth")d.month=parseInt(val);
     else if(field==="fyear")d.year=parseInt(val);
     if(d.day&&d.month&&d.year)setState({filterDateFrom:d});
   } else if(target==="filterTo"){
-    const cur=state.filterDateTo||{day:31,month:12,year:new Date().getFullYear()+543};
+    const cur=state.filterDateTo||{day:31,month:12,year:new Date().getFullYear()};
     const d={...cur};
     if(field==="tday")d.day=parseInt(val);
     else if(field==="tmonth")d.month=parseInt(val);
@@ -1219,7 +1311,7 @@ window.handleDelete=handleDelete;
 window.triggerDistCalc=triggerDistCalc;
 window.exportReport=function(id){
   const r=state.reports.find(x=>String(x.id)===String(id));if(!r)return;
-  const dateStr=formatThaiDate(r.date);
+  const dateStr=formatThaiDateBE(r.date);
   const relayStr=r.relay||"-";
   const bkCode=(r.breakerCode||"").replace(/['"<>&]/g,"");
   const _subCode2=(r.substation||'').split(' — ')[0].trim()||r.substation||'';
@@ -1302,8 +1394,8 @@ window.exportReport=function(id){
     '<span class="sbar2">④ สาเหตุและการดำเนินการ</span>',
     '<table class="tbl" style="table-layout:fixed;width:100%"><col style="width:28%"><col style="width:72%">',
     '<tr><td class="lbl">สาเหตุ :</td><td class="val" style="white-space:pre-wrap">'+(r.causeText||'–')+'</td></tr>',
-    '<tr><td class="lbl">การดำเนินการ :</td><td class="val" style="white-space:pre-wrap">'+(r.action||'–')+'</td></tr>',
-    '<tr><td class="lbl">หมายเหตุ :</td><td class="val" style="white-space:pre-wrap">'+(r.note||'–')+'</td></tr>',
+    '<tr><td class="lbl">การดำเนินการ :</td><td class="val" style="white-space:pre-wrap">'+(r.action instanceof Date || (typeof r.action==='string'&&r.action.includes('1899'))?'–':(r.action||'–'))+'</td></tr>',
+    '<tr><td class="lbl">หมายเหตุ :</td><td class="val" style="white-space:pre-wrap">'+(r.note instanceof Date || (typeof r.note==='string'&&r.note.includes('1899'))?'–':(r.note||'–'))+'</td></tr>',
     '</table></div>',
     '<div class="ft"><span>แผนกควบคุมระบบไฟฟ้า กปบ.(น3)</span>',
     '<div style="text-align:right"><div>พิมพ์เมื่อ '+new Date().toLocaleString('th-TH')+'</div>',
@@ -1381,7 +1473,7 @@ window.exportFormReport = function(id) {
   const r = state.reports.find(x => String(x.id) === String(id));
   if (!r) return;
 
-  const dateStr  = formatThaiDate(r.date);
+  const dateStr  = formatThaiDateBE(r.date);
   // ดึงชื่อสถานีไฟฟ้าจาก SUB_NAMES map
   const _subCode = (r.substation||'').split(' — ')[0].trim() || r.substation || '';
   const subName  = getSubName(_subCode) || (r.substation||'–').replace(/^[A-Z0-9_/]+ — /,'').trim() || '–';
@@ -1417,15 +1509,15 @@ window.exportFormReport = function(id) {
   const tripColor = isTR ? '#f5e000' : isTL ? '#e74c3c' : '#f5e000';
   const tripTextColor = isTR ? '#000' : isTL ? '#fff' : '#000';
 
-  // ปีจากวันที่ที่กรอก (พ.ศ.)
+  // ปีจากวันที่ที่กรอก (ค.ศ.)
   const yr = (r.date && r.date.year) ? r.date.year
-    : (r.createdAt ? new Date(r.createdAt).getFullYear()+543 : new Date().getFullYear()+543);
+    : (r.createdAt ? new Date(r.createdAt).getFullYear() : new Date().getFullYear());
   // นับสถิติเฉพาะปี yr และ breaker เดียวกัน
   // นับสถิติ: breaker เดียวกัน + ปีเดียวกัน
   const same = state.reports.filter(x => {
     if(!x.breakerCode || x.breakerCode !== r.breakerCode) return false;
     const xy = (x.date && x.date.year) ? Number(x.date.year)
-      : (x.createdAt ? new Date(x.createdAt).getFullYear()+543 : 0);
+      : (x.createdAt ? new Date(x.createdAt).getFullYear() : 0);
     return xy === Number(yr);
   });
   // Major: Trip Reclose → T/R, Trip Lockout (ทั้ง 2 แบบ) → T/L
@@ -1507,7 +1599,7 @@ window.exportFormReport = function(id) {
     '<div style="font-weight:700;margin-bottom:6px">พื้นที่ได้รับผลกระทบ :</div>' +
     '<div style="font-size:11pt;line-height:1.5;word-break:break-all;white-space:normal">'+affected+'</div>' +
     '<div style="margin-top:14px;border:1px solid #bbb;border-radius:6px;padding:10px">' +
-    '<div style="background:#d0d0d0;font-size:12pt;font-weight:800;text-align:center;padding:6px 4px;border-radius:3px;margin-bottom:10px;color:#222">สถิติการทำงานสะสมประจำปี '+yr+'</div>' +
+    '<div style="background:#d0d0d0;font-size:12pt;font-weight:800;text-align:center;padding:6px 4px;border-radius:3px;margin-bottom:10px;color:#222">สถิติการทำงานสะสมประจำปี '+(yr>2400?yr:yr+543)+'</div>' +
     '<div style="display:flex;gap:16px;justify-content:center;align-items:flex-end">' +
     '<div><div style="font-size:9pt;text-align:center;margin-bottom:2px;font-weight:600">T/R :</div>' +
     '<div style="background:#f5e000;font-size:26pt;font-weight:900;text-align:center;color:#222;padding:4px 18px;min-width:60px;border-radius:4px">'+trCount+'</div></div>' +
@@ -1525,7 +1617,7 @@ window.exportFormReport = function(id) {
     '<td class="L">พื้นที่ได้รับผลกระทบ :</td>' +
     '<td class="V" colspan="2" style="white-space:normal;word-break:break-word;line-height:1.6">'+affected+'</td>' +
     '<td colspan="3" rowspan="2" style="border:1px solid #bbb;padding:10px;vertical-align:middle">' +
-    '<div style="background:#d0d0d0;font-size:12pt;font-weight:800;text-align:center;padding:6px 4px;border-radius:3px;margin-bottom:10px;color:#222">สถิติการทำงานสะสมประจำปี '+yr+'</div>' +
+    '<div style="background:#d0d0d0;font-size:12pt;font-weight:800;text-align:center;padding:6px 4px;border-radius:3px;margin-bottom:10px;color:#222">สถิติการทำงานสะสมประจำปี '+(yr>2400?yr:yr+543)+'</div>' +
     '<div style="display:flex;gap:16px;justify-content:center;align-items:flex-end">' +
     '<div><div style="font-size:9pt;text-align:center;margin-bottom:2px;font-weight:600">T/R :</div>' +
     '<div style="background:#f5e000;font-size:26pt;font-weight:900;text-align:center;color:#222;padding:4px 18px;min-width:60px;border-radius:4px">'+trCount+'</div></div>' +
@@ -1560,6 +1652,7 @@ window.exportFormReport = function(id) {
 // INIT
 // ══════════════════════════════════════════
 document.addEventListener("DOMContentLoaded",async()=>{
+  const _t=localStorage.getItem("theme")||"dark";document.body.setAttribute("data-theme",_t);
   render();
   setState({syncing:true},false);
   // Load reports and B22 in parallel
@@ -1570,6 +1663,7 @@ document.addEventListener("DOMContentLoaded",async()=>{
     loadB22(),
     loadB115(),
     loadDistLive(),
+    loadGFJ(),
     loadSubNames(),
   ]);
   if(liveDist && liveDist.length > 100) distLiveCache = liveDist;
